@@ -2,7 +2,8 @@
     'titulo' => 'Editar Funcionário',
     'cabecalho' => 'Editar Funcionário',
     'rota' => '',
-    'relatorio' => ''
+    'relatorio' => '',
+    'class' => App\Models\Funcionario::class
 ])
 
 @section('conteudo')
@@ -22,13 +23,16 @@
     </div>
 
     <div class="mb-3">
+        <label>Nova Senha (deixe em branco para manter a atual)</label>
+        <input type="password" name="senha" class="form-control">
+    </div>
+
+    <div class="mb-3">
         <label>Turno</label>
         <select name="turno" class="form-select" required>
-            @foreach($turnos as $t)
-                <option value="{{ $t }}" {{ $func->turno == $t ? 'selected' : '' }}>
-                    {{ strtoupper($t) }}
-                </option>
-            @endforeach
+            <option value="gerente">Gerente</option>
+            <option value="entrada">Entrada</option>
+            <option value="saida">Saída</option>
         </select>
     </div>
 

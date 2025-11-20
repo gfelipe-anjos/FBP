@@ -2,7 +2,8 @@
     'titulo' => 'Novo Motorista',
     'cabecalho' => 'Cadastrar Motorista',
     'rota' => '',
-    'relatorio' => ''
+    'relatorio' => '',
+    'class' => App\Models\Motorista::class
 ])
 
 @section('conteudo')

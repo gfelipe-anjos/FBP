@@ -11,14 +11,7 @@ return new class extends Migration {
             $table->string('nome');
             $table->string('email')->unique();
             $table->string('senha');
-            $table->enum('turno', [
-                'gerente',
-                'manha_par_entrada','manha_par_saida',
-                'manha_impar_entrada','manha_impar_saida',
-                'noite_par_entrada','noite_par_saida',
-                'noite_impar_entrada','noite_impar_saida'
-            ])->default('manha_par_entrada');
-            $table->boolean('is_gerente')->default(false);
+            $table->enum('turno', ['gerente', 'entrada', 'saida']);
             $table->string('foto')->nullable();
             $table->softDeletes();
             $table->timestamps();

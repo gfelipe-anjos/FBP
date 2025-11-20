@@ -5,33 +5,32 @@ namespace App\Http\Controllers;
 use App\Models\Funcionario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Gate;
 
 class FuncionarioController extends Controller
 {
     public function index() {
+        Gate::authorize('viewAny', Funcionario::class);
+        
         $funcionarios = Funcionario::orderBy('id','desc')->get();
         return view('funcionario.index', compact('funcionarios'));
     }
 
     public function create() {
-        $turnos = [
-            'gerente',
-            'manha_par_entrada','manha_par_saida',
-            'manha_impar_entrada','manha_impar_saida',
-            'noite_par_entrada','noite_par_saida',
-            'noite_impar_entrada','noite_impar_saida'
-        ];
-
+        Gate::authorize('create', Funcionario::class);
+        
+        $turnos = ['gerente', 'entrada', 'saida'];
         return view('funcionario.create', compact('turnos'));
     }
 
     public function store(Request $request) {
+        Gate::authorize('create', Funcionario::class);
 
         $request->validate([
             'nome' => 'required|string|max:255',
             'email' => 'required|email|unique:funcionarios,email',
             'senha' => 'required|string|min:4',
-            'turno' => 'required|string',
+            'turno' => 'required|in:gerente,entrada,saida',
             'foto' => 'nullable|image|max:2048'
         ]);
 
@@ -39,8 +38,7 @@ class FuncionarioController extends Controller
         $func->nome = mb_strtoupper($request->nome, 'UTF-8');
         $func->email = $request->email;
         $func->senha = Hash::make($request->senha);
-        $func->turno = $request->turno;
-        $func->is_gerente = ($request->turno === 'gerente');
+        $func->turno = $request->turno; // Apenas turno, sem role_id
 
         $func->save();
 
@@ -62,14 +60,9 @@ class FuncionarioController extends Controller
             return redirect()->route('funcionario.index');
         }
 
-        $turnos = [
-            'gerente',
-            'manha_par_entrada','manha_par_saida',
-            'manha_impar_entrada','manha_impar_saida',
-            'noite_par_entrada','noite_par_saida',
-            'noite_impar_entrada','noite_impar_saida'
-        ];
-
+        Gate::authorize('update', $func);
+        
+        $turnos = ['gerente', 'entrada', 'saida'];
         return view('funcionario.edit', compact(['func','turnos']));
     }
 
@@ -80,17 +73,22 @@ class FuncionarioController extends Controller
             return redirect()->route('funcionario.index');
         }
 
+        Gate::authorize('update', $func);
+
         $request->validate([
             'nome' => 'required|string|max:255',
             'email' => 'required|email|unique:funcionarios,email,'.$func->id,
-            'turno' => 'required|string',
+            'turno' => 'required|in:gerente,entrada,saida',
             'foto' => 'nullable|image|max:2048'
         ]);
 
         $func->nome = mb_strtoupper($request->nome, 'UTF-8');
         $func->email = $request->email;
-        $func->turno = $request->turno;
-        $func->is_gerente = ($request->turno === 'gerente');
+        $func->turno = $request->turno; 
+
+        if($request->filled('senha')) {
+            $func->senha = Hash::make($request->senha);
+        }
 
         if($request->hasFile('foto')) {
             $ext = $request->file('foto')->getClientOriginalExtension();
@@ -107,9 +105,13 @@ class FuncionarioController extends Controller
     public function destroy(string $id) {
         $func = Funcionario::find($id);
 
-        if(isset($func)) {
-            $func->delete(); 
+        if(!isset($func)) {
+            return redirect()->route('funcionario.index');
         }
+
+        Gate::authorize('delete', $func);
+
+        $func->delete(); 
 
         return redirect()->route('funcionario.index');
     }

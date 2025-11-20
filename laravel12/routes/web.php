@@ -10,10 +10,15 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
-Route::resource('funcionario', FuncionarioController::class);
-Route::resource('motorista', MotoristaController::class);
-Route::resource('entrada', EntradaController::class);
-Route::resource('saida', SaidaController::class);
+// Rotas protegidas por autenticação
+Route::middleware(['auth:funcionario', 'verified'])->group(function () {
+    Route::resource('funcionario', FuncionarioController::class);
+    Route::resource('motorista', MotoristaController::class);
+    Route::resource('entrada', EntradaController::class);
+    Route::resource('saida', SaidaController::class);
+    
+    Route::get('/relatorio/saidas/pagamentos', [SaidaController::class, 'relatorioPagamentosPdf'])
+        ->name('saidas.relatorio');
+});
 
-Route::get('/relatorio/saidas/pagamentos', [SaidaController::class, 'relatorioPagamentosPdf'])
-->name('saidas.relatorio');
+require __DIR__.'/auth.php';

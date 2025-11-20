@@ -8,10 +8,13 @@ use App\Models\Motorista;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Gate;
 
 class SaidaController extends Controller
 {
     public function index() {
+        Gate::authorize('viewAny', Saida::class);
+        
         $saidas = Saida::with(['motorista', 'entrada'])
                         ->orderBy('id','desc')
                         ->get();
@@ -20,45 +23,50 @@ class SaidaController extends Controller
     }
 
     public function create() {
+        Gate::authorize('create', Saida::class);
+        
+        $entradas = Entrada::where('encerrada', false)->get();
+
         $motoristas = Motorista::all();
-        return view('saida.create', compact('motoristas'));
-    }
+        
+        return view('saida.create', compact('entradas'));
+    }    
     
     public function store(Request $request) {
-        $motorista = Motorista::find($request->motorista_id);
-    
-        if (!$motorista) {
-            return redirect()->route('saida.index')->with('erro', 'Motorista não encontrado.');
-        }
-    
-        $entrada = Entrada::where('motorista_id', $motorista->id)
+        Gate::authorize('create', Saida::class);
+
+        $entrada = Entrada::where('id', $request->entrada_id)
                           ->where('encerrada', false)
-                          ->orderBy('id', 'desc')
                           ->first();
     
         if (!$entrada) {
-            return redirect()->route('saida.index')->with('erro', 'Este motorista não possui entrada ativa.');
+            return redirect()->route('saida.index');
         }
+    
+        $motorista = $entrada->motorista;
     
         $horaEntrada = Carbon::parse($entrada->data_hora_entrada);
         $horaSaida = Carbon::parse($request->data_hora_saida);
-    
         $horas = $horaEntrada->floatDiffInHours($horaSaida, true);
     
         switch ($motorista->tipo_cliente) {
-            case 'aditivado': $valorHora = 12; break;
-            case 'premium': $valorHora = 24; break;
-            case 'power': $valorHora = 36; break;
-            case 'fidelidade': $valorHora = 48; break;
-            case 'amigo do aldo': $valorHora = 6; break;
-            case 'novo cliente': $valorHora = 10; break;
-            default: $valorHora = 0;
+            case 'aditivado':   $valorHora = 12; break;
+            case 'premium':     $valorHora = 24; break;
+            case 'power':       $valorHora = 36; break;
+            case 'fidelidade':  $valorHora = 48; break;
+            case 'amigo_aldo':  $valorHora = 6;  break;
+            case 'novo':        $valorHora = 10; break;
+            default:            $valorHora = 0;
         }
-
-        $valor = $valorHora * $horas;
     
-        if ($motorista->tipo_cliente == "amigo do aldo" && $horas >= 24) $valor = 60;
-        if ($motorista->tipo_cliente == "novo cliente" && $horas >= 24) $valor = 100;
+        $valor = $valorHora * $horas;
+        if ($motorista->tipo_cliente == "amigo_aldo" && $horas >= 24) {
+            $valor = 60;
+        }
+    
+        if ($motorista->tipo_cliente == "novo" && $horas >= 24) {
+            $valor = 100;
+        }
     
         $saida = new Saida();
         $saida->motorista()->associate($motorista);
@@ -68,23 +76,30 @@ class SaidaController extends Controller
         $saida->valor = $valor;
         $saida->save();
     
-        // encerra a entrada
         $entrada->encerrada = true;
         $entrada->save();
     
         return redirect()->route('saida.index');
-    }    
+    }        
 
     public function edit(string $id) {
         $saida = Saida::find($id);
 
         if(!isset($saida)) return redirect()->route('saida.index');
 
+        Gate::authorize('update', $saida);
+
         return view('saida.edit', compact('saida'));
     }
 
     public function update(Request $request, string $id) {
         $saida = Saida::find($id);
+
+        if(!isset($saida)) {
+            return redirect()->route('saida.index');
+        }
+
+        Gate::authorize('update', $saida);
 
         if(isset($saida)) {
             $saida->data_hora_saida = $request->data_hora_saida;
@@ -96,25 +111,27 @@ class SaidaController extends Controller
     }
 
     public function relatorioPagamentosPdf() {
-    $saidas = Saida::with(['motorista', 'entrada'])->get();
+        Gate::authorize('viewAny', Saida::class);
+        
+        $saidas = Saida::with(['motorista', 'entrada'])->get();
 
-    // Calculando totais
-    $totalPix = $saidas->where('forma_pagamento', 'PIX')->sum('valor');
-    $totalDebito = $saidas->where('forma_pagamento', 'DÉBITO')->sum('valor');
-    $totalCredito = $saidas->where('forma_pagamento', 'CRÉDITO')->sum('valor');
-    $totalDinheiro = $saidas->where('forma_pagamento', 'DINHEIRO')->sum('valor');
-    $totalGeral = $saidas->sum('valor');
+        // Calculando totais
+        $totalPix = $saidas->where('forma_pagamento', 'pix')->sum('valor');
+        $totalDebito = $saidas->where('forma_pagamento', 'debito')->sum('valor');
+        $totalCredito = $saidas->where('forma_pagamento', 'credito')->sum('valor');
+        $totalDinheiro = $saidas->where('forma_pagamento', 'dinheiro')->sum('valor');
+        $totalGeral = $saidas->sum('valor');
 
-    // Gerando PDF
-    $pdf = PDF::loadView('saida.relatorio', compact(
-        'saidas',
-        'totalPix',
-        'totalDebito',
-        'totalCredito',
-        'totalDinheiro',
-        'totalGeral'
-    ));
+        // Gerando PDF
+        $pdf = PDF::loadView('saida.relatorio', compact(
+            'saidas',
+            'totalPix',
+            'totalDebito',
+            'totalCredito',
+            'totalDinheiro',
+            'totalGeral'
+        ));
 
-    return $pdf->stream('relatorio_pagamentos.pdf');
+        return $pdf->stream('relatorio_pagamentos.pdf');
     }
 }

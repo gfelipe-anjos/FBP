@@ -2,7 +2,8 @@
     'titulo' => 'Entradas',
     'cabecalho' => 'Lista de Entradas',
     'rota' => 'entrada.create',
-    'relatorio' => ''
+    'relatorio' => '',
+    'class' => App\Models\Entrada::class
 ])
 
 @section('conteudo')

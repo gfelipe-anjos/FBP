@@ -2,7 +2,8 @@
     'titulo' => 'Novo Funcionário',
     'cabecalho' => 'Cadastrar Funcionário',
     'rota' => '',
-    'relatorio' => ''
+    'relatorio' => '',
+    'class' => App\Models\Funcionario::class
 ])
 
 @section('conteudo')
@@ -28,9 +29,9 @@
     <div class="mb-3">
         <label>Turno</label>
         <select name="turno" class="form-select" required>
-            @foreach($turnos as $t)
-                <option value="{{ $t }}">{{ strtoupper($t) }}</option>
-            @endforeach
+            <option value="gerente">Gerente</option>
+            <option value="entrada">Entrada</option>
+            <option value="saida">Saída</option>
         </select>
     </div>
 

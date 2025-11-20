@@ -2,7 +2,8 @@
     'titulo' => 'Saídas',
     'cabecalho' => 'Lista de Saídas',
     'rota' => 'saida.create',
-    'relatorio' => 'saidas.relatorio'
+    'relatorio' => 'saidas.relatorio',
+    'class' => App\Models\Saida::class
 ])
 
 @section('conteudo')

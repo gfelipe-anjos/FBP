@@ -9,16 +9,27 @@ use Illuminate\Support\Facades\Hash;
 
 class FuncionarioSeeder extends Seeder
 {
-    public function run(): void
-    {
-        DB::table('funcionarios')->insert([
-            'nome' => 'Gerente Geral',
-            'email' => 'gerenteFBP@gmail.com',
-            'senha' => Hash::make('123456'),
-            'turno' => 'gerente',
-            'is_gerente' => true,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);        
+    public function run(): void {
+        $data = [
+            [
+                "nome" => "GERENTE GERAL",
+                "email" => "gerente@fbp.com",
+                "senha" => Hash::make('123456'),
+                "turno" => "gerente",
+            ],
+            [
+                "nome" => "FUNCIONARIO ENTRADA", 
+                "email" => "entrada@fbp.com",
+                "senha" => Hash::make('123456'),
+                "turno" => "entrada",
+            ],
+            [
+                "nome" => "FUNCIONARIO SAIDA",
+                "email" => "saida@fbp.com", 
+                "senha" => Hash::make('123456'),
+                "turno" => "saida",
+            ],
+        ];
+        DB::table('funcionarios')->insert($data);
     }
 }

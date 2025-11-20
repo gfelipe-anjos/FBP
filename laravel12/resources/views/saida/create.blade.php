@@ -2,7 +2,8 @@
     'titulo' => 'Nova Saída',
     'cabecalho' => 'Registrar Saída',
     'rota' => '',
-    'relatorio' => ''
+    'relatorio' => '',
+    'class' => App\Models\Saida::class
 ])
 
 @section('conteudo')
@@ -15,17 +16,15 @@
     @csrf
 
     <div class="mb-3">
-        <label>Motorista</label>
-        <select name="motorista_id" class="form-select" required>
-            <option value="">Selecione</option>
-            @foreach($motoristas as $m)
-                <option value="{{ $m->id }}">
-                    {{ $m->cpf }} — {{ $m->placa }}
-            </option>
+        <label>Entrada</label>
+        <select name="entrada_id" class="form-select" required>
+            <option value="">Selecione uma entrada</option>
+            @foreach($entradas as $entrada)
+                <option value="{{ $entrada->id }}">
+                    {{ $entrada->motorista->cpf }} - {{ $entrada->motorista->placa }} 
+                </option>
             @endforeach
         </select>
-
-
     </div>
 
     <div class="mb-3">

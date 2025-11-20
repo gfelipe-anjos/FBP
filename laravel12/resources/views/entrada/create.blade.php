@@ -2,7 +2,8 @@
     'titulo' => 'Nova Entrada',
     'cabecalho' => 'Registrar Entrada',
     'rota' => '',
-    'relatorio' => ''
+    'relatorio' => '',
+    'class' => App\Models\Entrada::class
 ])
 
 @section('conteudo')
