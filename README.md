@@ -1,4 +1,4 @@
-No esquecer de fazer isso ao commitar:
+No esquecer de fazer isso:
 
 - composer install
 - npm install
