@@ -8,6 +8,19 @@
 
 @section('conteudo')
 
+<style>
+    .btn-editar {
+        background-color: #80bc96 !important;
+        color: #fff !important;
+        border: none !important;
+    }
+
+    .btn-editar:hover {
+        background-color: #6aa57e !important;
+        transform: scale(1.05);
+    }
+</style>
+
 <div class="table-responsive">
     <table class="table table-striped align-middle">
         <thead class="table-secondary">
@@ -29,10 +42,12 @@
                 <td>{{ date('d/m/Y H:i', strtotime($e->data_hora_entrada)) }}</td>
 
                 <td>
-                    <a href="{{ route('entrada.edit', $e->id) }}"
-                       class="btn btn-sm btn-secondary">
-                        Editar
-                    </a>
+                <a href="{{ route('entrada.edit', $e->id) }}"
+                class="btn btn-sm btn-editar"
+                style="background-color: #80bc96; color: #FFF; border: none;">
+                    Editar
+                </a>
+
                 </td>
             </tr>
             @endforeach
