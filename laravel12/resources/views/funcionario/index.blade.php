@@ -8,6 +8,30 @@
 
 @section('conteudo')
 
+<style>
+    .btn-editar {
+        background-color: #80bc96 !important;
+        color: #fff !important;
+        border: none !important;
+    }
+
+    .btn-editar:hover {
+        background-color: #6aa57e !important;
+        transform: scale(1.05);
+    }
+
+    .btn-remover {
+        background-color: #f2c14e !important;
+        color: #000 !important;
+        border: none !important;
+    }
+
+    .btn-remover:hover {
+        background-color: #d9aa39 !important;
+        transform: scale(1.05);
+    }
+</style>
+
 <div class="table-responsive">
     <table class="table table-striped align-middle">
         <thead class="table-secondary">
@@ -34,14 +58,25 @@
                 <td>{{ $f->turno }}</td>
                 <td>
                     @can('update', $f)
-                    <a href="{{ route('funcionario.edit', $f->id) }}" class="btn btn-sm btn-secondary">Editar</a>
+                    <a href="{{ route('funcionario.edit', $f->id) }}"
+                    class="btn btn-sm btn-editar"
+                    style="background-color: #80bc96; color: #fff; border: none;">
+                    Editar
+                    </a>
+
                     @endcan
 
                     @can('delete', $f)
                     <form id="form_{{ $f->id }}" action="{{ route('funcionario.destroy', $f->id) }}" method="POST" style="display:inline;">
                         @csrf
                         @method('DELETE')
-                        <button type="button" class="btn btn-sm btn-danger" onclick="showRemoveModal('{{ $f->id }}','{{ $f->nome }}')">Remover</button>
+                        <button type="button"
+                        class="btn btn-sm btn-remover"
+                        style="background-color: #f2c14e; color: #000; border: none;"
+                        onclick="showRemoveModal('{{ $f->id }}','{{ $f->nome }}')">
+                            Remover
+                        </button>
+
                     </form>
                     @endcan
                 </td>
